@@ -1,7 +1,8 @@
 <?php
 // error_reporting(0);
 // ini_set('display_errors', 0);
-system(clear);
+set_time_limit(0);
+system('clear');
 
 //-       parse variables       -\\
 foreach( $argv as $argument ) {
@@ -22,7 +23,7 @@ if (!isset($file_name) || !isset($campaign_id)) {
 echo "List Name: ".$file_name."\n";
 echo "Campaign ID: ".$campaign_id."\n";
 
-$link=mysqli_connect('localhost','cron','1234','asterisk');
+$link=mysqli_connect('192.168.1.10','cron','1234','asterisk');
 
 //-       check if list dont exist       -\\
 
@@ -42,11 +43,11 @@ $list_id=date("dmYhms");
 echo "List ID: ".$list_id."\n";
 //list_changedate  '$SQLdate'
 $createNewListQuery="INSERT INTO vicidial_lists (list_id,list_name,campaign_id,active,list_description) values('$list_id','$file_name','$campaign_id','Y','AutoUpload');";
-// if(!mysqli_query($link,$createNewListQuery)){
-// 	echo "Error while creating list!\n".mysqli_error($link);return;
-// }else{
-// 	echo "List Created!\n";
-// }
+if(!mysqli_query($link,$createNewListQuery)){
+	echo "Error while creating list!\n".mysqli_error($link);return;
+}else{
+	echo "List Created!\n";
+}
 
 //-       upload list       -\\
 $delimiter="\t";
@@ -56,7 +57,7 @@ $header=NULL;
 $dupLeads=0;
 $totalLeads=0;
 $iloop = "0";
-
+$record=0;
 //get header
 while (!feof($file)){
 	$record++;
@@ -128,19 +129,19 @@ while (!feof($file)){
 			$dup_lead_list	=	$dupList[0];
 			echo("Duplicate: $phone_number on list $dupList[0] \n");
 		} else{
-			//$stmtZ = "INSERT INTO vicidial_list (lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id) values('','$entry_date','$modify_date','$status','$user','$vendor_lead_code','$source_id','$list_id','$gmt_offset','$called_since_last_reset','$phone_code','$phone_number','$title','$first_name','$middle_initial','$last_name','$address1','$address2','$address3','$city','$state','$province','$postal_code','$country_code','$gender','$date_of_birth','$alt_phone','$email','$security_phrase','$comments',0,'2008-01-01 00:00:00','$rank','$owner','$list_id');";
-			//mysqli_query($link,$stmtZ)
+			$stmtZ = "INSERT INTO vicidial_list (lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id) values('','$entry_date','$modify_date','$status','$user','$vendor_lead_code','$source_id','$list_id','$gmt_offset','$called_since_last_reset','$phone_code','$phone_number','$title','$first_name','$middle_initial','$last_name','$address1','$address2','$address3','$city','$state','$province','$postal_code','$country_code','$gender','$date_of_birth','$alt_phone','$email','$security_phrase','$comments',0,'2008-01-01 00:00:00','$rank','$owner','$list_id');";
+			mysqli_query($link,$stmtZ);
 			//echo("Done: $phone_number \n");
 		}
 		//animation
-		// $warn = "Uploading...\r";
-		// if (strlen($warn) === $iloop+1){
-		// 	$iloop = "0";
-		// }
-		// $warn = str_split($warn);
-		// $iloop++;
-		// $warn[$iloop] = strtoupper($warn[$iloop]);
- 		//echo implode($warn);
+		$warn = "Uploading...\r";
+		if (strlen($warn) === $iloop+1){
+			$iloop = "0";
+		}
+		$warn = str_split($warn);
+		$iloop++;
+		$warn[$iloop] = strtoupper($warn[$iloop]);
+ 		echo implode($warn);
 	}
 }
 
@@ -150,4 +151,5 @@ echo "Total: $totalLeads \n";
 echo "Duplicates: $dupLeads \n";
 echo "Done: $doneLeads \n";
 shell_exec('mv '.$file_name.' done/'.$file_name);
+sleep(3);
 ?>
